@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: travelPlanner
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/travelplanner
+
+geoapify:
+  api:
+    key: 4a60152cf5fa49c785238b5c17bca524
+    url: https://api.geoapify.com/v1/geocode/search?text=%s&apiKey=%s
+
+jwt:
+  secret-key: JWT_SECRET
+  secret-default-value: jxgEQeXHuPq8VdbyYFNkANdudQ53YUn4
+  header: Authorization
+  bearer: "Bearer "
