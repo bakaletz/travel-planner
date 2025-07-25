@@ -1,4 +1,4 @@
-package com.example.travelPlanner;
+package com.example.travel.planner;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
