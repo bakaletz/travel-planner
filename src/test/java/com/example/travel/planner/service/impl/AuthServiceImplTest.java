@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -72,21 +73,20 @@ class AuthServiceImplTest {
         String secret = "my-secret-key-my-secret-key-my-secret-key12";
 
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(authenticationManager.authenticate(any())).thenReturn(authenticationResponse);
-        when(authenticationResponse.isAuthenticated()).thenReturn(true);
         when(env.getProperty(eq("jwt.secret.key"), anyString())).thenReturn(secret);
         when(jwtConstants.getSecretKey()).thenReturn("jwt.secret.key");
         when(jwtConstants.getSecretDefaultValue()).thenReturn("Default");
-        when(jwtConstants.getBearer()).thenReturn("Bearer ");
 
         assertDoesNotThrow(() -> authService.authenticateUser(loginRequestDTO));
+
+        verify(authenticationManager).authenticate(any());
     }
 
     @Test
-    void authenticateUser_shouldThrow_whenUserNotFound() {
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+    void authenticateUser_shouldThrowBadCredentialsException_whenDataIsInvalid(){
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
 
-        assertThrows(Exception.class, () -> authService.authenticateUser(loginRequestDTO));
+        assertThrows(BadCredentialsException.class,() -> authService.authenticateUser(loginRequestDTO));
 
         verify(authenticationManager).authenticate(any());
     }
