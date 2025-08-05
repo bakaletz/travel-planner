@@ -1,5 +1,6 @@
 package com.example.travel.planner.client;
 
+import com.example.travel.planner.exception.ExternalApiException;
 import com.example.travel.planner.exception.LocationNotFoundException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -56,7 +58,23 @@ class GeoapifyClientTest {
     }
 
     @Test
+    void searchLocation_shouldThrowRestClientException_ifItsProblemWithExternalAPI(){
+        when(restTemplate.getForEntity(url, JsonNode.class)).thenThrow(new RestClientException(""));
+
+        assertThrows(ExternalApiException.class, () -> geoapifyClient.searchLocation("Test"));
+    }
+
+    @Test
     void searchLocation_shouldThrowLocationNotFoundException_ifBodyIsNull() {
+        ResponseEntity<JsonNode> response = new ResponseEntity<>(null, HttpStatus.OK);
+
+        when(restTemplate.getForEntity(url, JsonNode.class)).thenReturn(response);
+
+        assertThrows(LocationNotFoundException.class, () -> geoapifyClient.searchLocation("Test"));
+    }
+
+    @Test
+    void searchLocation_shouldThrowLocationNotFoundException_ifHasNotFeatures(){
         ObjectNode rootNode = mapper.createObjectNode();
         ResponseEntity<JsonNode> response = new ResponseEntity<>(rootNode, HttpStatus.OK);
 
